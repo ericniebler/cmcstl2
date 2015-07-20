@@ -78,7 +78,7 @@ struct reference_value_type<std::pair<First, Second>> {
 
 template <class R>
 using ReferenceValueType =
-  std::remove_cv_t<std::remove_reference_t<meta::eval<reference_value_type<R>>>>;
+  std::remove_cv_t<std::remove_reference_t<meta::_t<reference_value_type<R>>>>;
 
 template <class R>
 concept bool ReadableReference =

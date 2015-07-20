@@ -62,7 +62,7 @@ using stl2::concepts::models::common;
 struct A {};
 }
 
-namespace std {
+namespace stl2 {
 template <>
 struct common_type<::common_test::A, ::common_test::A> {
   using type = void;
@@ -87,27 +87,27 @@ struct C { C() = default; C(B) {} };
 static_assert(common<B,C>(), "");
 }
 
-namespace constructible_test {
-
-template <class T, class U>
-  requires stl2::core::Constructible<T, U>()
-constexpr bool f() { return false; }
-
-template <class T, stl2::Convertible<T> >
-constexpr bool f() { return true; }
-
-static_assert(f<int,int>(), "");
-static_assert(f<int,long>(), "");
-
-struct A {
-  A(int);
-};
-struct B {
-  explicit B(int);
-};
-static_assert(f<A, int>(), "");
-static_assert(!f<B, int>(), "");
-}
+//namespace constructible_test {
+//
+//template <class T, class U>
+//  requires stl2::core::Constructible<T, U>()
+//constexpr bool f() { return false; }
+//
+//template <class T, stl2::Convertible<T> >
+//constexpr bool f() { return true; }
+//
+//static_assert(f<int,int>(), "");
+//static_assert(f<int,long>(), "");
+//
+//struct A {
+//  A(int);
+//};
+//struct B {
+//  explicit B(int);
+//};
+//static_assert(f<A, int>(), "");
+//static_assert(!f<B, int>(), "");
+//}
 
 namespace {
 struct tag {};

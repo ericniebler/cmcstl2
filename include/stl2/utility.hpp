@@ -66,7 +66,7 @@ struct identity {
 };
 
 template <class T = void>
-  requires Same<T, void> || EqualityComparable<T>
+  requires Same<T, void>() || EqualityComparable<T>()
 struct equal_to {
   constexpr auto operator()(const T& a, const T& b) const {
     return a == b;

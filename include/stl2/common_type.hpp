@@ -79,10 +79,9 @@ struct common_type<T, U>
   : common_type<std::decay_t<T>, std::decay_t<U>> { };
 
 template <class T>
-constexpr bool __decayed = meta::_v<std::is_same<std::decay_t<T>, T>>;
+concept bool _Decayed = meta::_v<std::is_same<std::decay_t<T>, T>>;
 
-template <class T, class U>
-  requires __decayed<T> && __decayed<U>
+template <_Decayed T, _Decayed U>
 struct common_type<T, U> : __builtin_common<T, U> { };
 
 template <class T, class U, class V, class... W>
@@ -139,9 +138,6 @@ template <class T, class U>
     (meta::_v<std::is_reference<__builtin_common_t<T, U>>> ||
     !requires {typename __basic_common_reference_t<T, U>;})
 struct common_reference<T, U> : __builtin_common<T, U> { };
-
-template <class T, class U, class V, class... W>
-struct common_reference<T, U, V, W...> { };
 
 template <class T, class U, class V, class... W>
   requires requires { typename common_reference_t<T, U>; }

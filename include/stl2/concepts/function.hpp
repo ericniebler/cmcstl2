@@ -18,12 +18,12 @@ using ResultType =
 
 template <class F, class...Args>
 concept bool Function =
-  CopyConstructible<F> &&
+  CopyConstructible<F>() &&
   requires(F& f, Args&&...args) {
     typename ResultType<F, Args...>;
     f((Args&&)(args)...);
     requires Same<ResultType<F, Args...>,
-                  decltype(f(stl2::forward<Args>(args)...))>;
+                  decltype(f(stl2::forward<Args>(args)...))>();
   };
 
 template <class F, class...Args>
@@ -38,7 +38,7 @@ concept bool Predicate =
 template <class R, class T, class U = T>
 concept bool Relation =
   Predicate<R, T, T> &&
-  (Same<T, U> ||
+  (Same<T, U>() ||
     (Predicate<R, T, U> &&
      Predicate<R, U, T> &&
      Predicate<R, U, U>));
@@ -46,8 +46,8 @@ concept bool Relation =
 template <class R, class T, class U = T>
 concept bool StrongRelation =
   Relation<R, T, U> &&
-  (Same<T, U> ||
-    (Common<T, U> &&
+  (Same<T, U>() ||
+    (Common<T, U>() &&
      Predicate<R, CommonType<T, U>,
                   CommonType<T, U>>));
 

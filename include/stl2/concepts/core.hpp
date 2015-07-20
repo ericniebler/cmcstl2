@@ -24,51 +24,56 @@
 namespace stl2 { inline namespace v1 { inline namespace concepts {
 
 template <class T, class U>
-concept bool Same =
-  STL2_IS_SAME_AS(T, U);
+concept bool Same() {
+  return STL2_IS_SAME_AS(T, U);
+}
 // Types T and U model Same iff T and U are the same type.
 
 template <class T, class U>
-concept bool Derived =
-  STL2_IS_BASE_OF(U, T);
+concept bool Derived() {
+  return STL2_IS_BASE_OF(U, T);
+}
 // Types T and U model Derived iff T and U are class types
 // and U is a base of T
 
 template <class T, class U>
 concept bool ExplicitlyConvertible() { return
-  Same<T, U> ||
+  Same<T, U>() ||
   requires(T&& t) {
     static_cast<U>(stl2::forward<T>(t));
   };
 }
 
 template <class T, class U>
-concept bool Convertible =
-  Same<T, U> ||
-  (ExplicitlyConvertible<T, U>() &&
-    std::is_convertible<T, U>::value);
+concept bool Convertible() {
+  return Same<T, U>() ||
+    (ExplicitlyConvertible<T, U>() &&
+      std::is_convertible<T, U>::value);
+}
 
 template <class T, class U>
-concept bool PubliclyDerived =
-  Same<T, U> ||
-  (Derived<T, U> && Convertible<T, U>);
+concept bool PubliclyDerived() {
+  return Same<T, U>() ||
+    (Derived<T, U>() && Convertible<T, U>());
+}
 
 template <class T, class U>
 using CommonType =
   meta::let<
-    meta::if_c<STL2_IS_SAME_AS(T, U), T,
+    meta::if_c<STL2_IS_SAME_AS(T, U), std::decay_t<T>,
       meta::defer_trait<stl2::common_type, T, U>>>;
 
 template <class T, class U>
-concept bool Common =
-  Same<T, U> ||
-  requires {
-    typename CommonType<T, U>;
-    typename CommonType<U, T>;
-    requires Same<CommonType<T, U>, CommonType<U, T>>;
-    requires ExplicitlyConvertible<T, CommonType<T, U>>();
-    requires ExplicitlyConvertible<U, CommonType<T, U>>();
-  };
+concept bool Common() {
+  return Same<T, U>() ||
+    requires {
+      typename CommonType<T, U>;
+      typename CommonType<U, T>;
+      requires Same<CommonType<T, U>, CommonType<U, T>>();
+      requires ExplicitlyConvertible<T, CommonType<T, U>>();
+      requires ExplicitlyConvertible<U, CommonType<T, U>>();
+    };
+}
 
 // Same<T, U> subsumes Convertible<T, U> and PubliclyDerived<T, U> and Common<T, U>
 // PubliclyDerived<T, U> subsumes Convertible<T, U>
@@ -78,41 +83,43 @@ concept bool Common =
 // and Same<T, U>) subsumes Constructible<U, T>
 
 template <class T, class U>
-concept bool Assignable =
-  requires(T&& t, U&& u) {
+concept bool Assignable() {
+  return requires(T&& t, U&& u) {
     stl2::forward<T>(t) = stl2::forward<U>(u);
-    requires Same<T&, decltype(stl2::forward<T>(t) = stl2::forward<U>(u))>;
-  };
-
-template <class T, class U>
-concept bool AssignableTo =
-  Assignable<U, T>;
-
-namespace core {
-
-template <class T>
-concept bool Constructible() { return
-  requires {
-    T{ };
+    requires Same<T&, decltype(stl2::forward<T>(t) = stl2::forward<U>(u))>();
   };
 }
 
 template <class T, class U>
-concept bool Constructible() { return
-  ExplicitlyConvertible<U, T>() ||
-  requires (U&& u) {
-    T{ (U&&)u };
-  };
+concept bool AssignableTo() {
+  return Assignable<U, T>();
 }
 
-template <class T, class U, class V, class...Args>
-concept bool Constructible() { return
-  requires (U&& u, V&& v, Args&&...args) {
-    T{ (U&&)u, (V&&)v, (Args&&)args... };
-  };
-}
-
-} // namespace core
+//namespace core {
+//
+//template <class T>
+//concept bool Constructible() { return
+//  requires {
+//    T{ };
+//  };
+//}
+//
+//template <class T, class U>
+//concept bool Constructible() { return
+//  ExplicitlyConvertible<U, T>() ||
+//  requires (U&& u) {
+//    T{ (U&&)u };
+//  };
+//}
+//
+//template <class T, class U, class V, class...Args>
+//concept bool Constructible() { return
+//  requires (U&& u, V&& v, Args&&...args) {
+//    T{ (U&&)u, (V&&)v, (Args&&)args... };
+//  };
+//}
+//
+//} // namespace core
 
 #undef STL2_IS_SAME_AS
 #undef STL2_IS_BASE_OF
